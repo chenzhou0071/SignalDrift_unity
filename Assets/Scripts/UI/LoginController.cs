@@ -48,13 +48,13 @@ public class LoginController : MonoBehaviour
         d.On(MsgId.RegisterResp, body =>
         {
             var r = Json.De<RegisterResp>(body);
-            statusText.text = r.code == 0 ? $"注册成功 UID={r.uid}，请登录"
-                : r.code == 409 ? "用户名已存在" : $"注册失败({r.code})";
+            statusText.text = r.code == 0 ? $"Registered! UID={r.uid}, please login"
+                : r.code == 409 ? "Username already taken" : $"Register failed ({r.code})";
         });
         d.On(MsgId.LoginResp, body =>
         {
             var r = Json.De<LoginResp>(body);
-            if (r.code != 0) { statusText.text = $"登录失败({r.code})"; return; }
+            if (r.code != 0) { statusText.text = $"Login failed ({r.code})"; return; }
             NetworkClient.I.Uid = r.uid;
             NetworkClient.I.Nickname = r.nickname;
             NetworkClient.I.ReconnectToken = r.token;
@@ -66,14 +66,14 @@ public class LoginController : MonoBehaviour
         d.On(MsgId.SetNicknameOK, body =>
         {
             var r = Json.De<SetNicknameResp>(body);
-            if (r.code != 0) { statusText.text = "昵称需 1-16 字符"; return; }
+            if (r.code != 0) { statusText.text = "Nickname must be 1-16 chars"; return; }
             NetworkClient.I.Nickname = r.nickname;
             SceneManager.LoadScene("Lobby");
         });
         confirmNicknameButton.onClick.AddListener(() =>
         {
             var nick = nicknameInput.text.Trim();
-            if (nick.Length < 1) { statusText.text = "请输入昵称"; return; }
+            if (nick.Length < 1) { statusText.text = "Enter a nickname"; return; }
             NetworkClient.I.Send(MsgId.SetNickname, new SetNicknameReq { nickname = nick });
         });
     }
@@ -82,7 +82,7 @@ public class LoginController : MonoBehaviour
     {
         var u = usernameInput.text.Trim();
         var p = passwordInput.text;
-        if (u.Length < 3 || p.Length < 6) { statusText.text = "用户名≥3字符，密码≥6字符"; return; }
+        if (u.Length < 3 || p.Length < 6) { statusText.text = "Username ≥3, password ≥6 chars"; return; }
 
         void DoSend()
         {
@@ -92,10 +92,10 @@ public class LoginController : MonoBehaviour
 
         if (!NetworkClient.I.Connected)
         {
-            statusText.text = "连接中...";
+            statusText.text = "Connecting...";
             NetworkClient.I.Connect(host, port, ok =>
             {
-                statusText.text = ok ? "" : "无法连接服务器";
+                statusText.text = ok ? "" : "Cannot connect to server";
                 if (ok) DoSend();
             });
         }
