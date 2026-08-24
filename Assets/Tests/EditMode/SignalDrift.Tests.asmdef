@@ -2,7 +2,8 @@
     "name": "SignalDrift.Tests",
     "rootNamespace": "",
     "references": [
-        "SignalDrift.Protocol"
+        "SignalDrift.Protocol",
+        "SignalDrift.Net"
     ],
     "includePlatforms": [
         "Editor"
