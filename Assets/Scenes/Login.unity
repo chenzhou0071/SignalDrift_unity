@@ -572,7 +572,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -308, y: -0.000049462}
-  m_SizeDelta: {x: 303.4943, y: 49.4625}
+  m_SizeDelta: {x: 303.4943, y: 55.4625}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &215699024
 MonoBehaviour:
@@ -1449,7 +1449,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 311, y: -0.000037606}
-  m_SizeDelta: {x: 303.4943, y: 49.4625}
+  m_SizeDelta: {x: 303.4943, y: 55.4625}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &832716279
 MonoBehaviour:
@@ -2115,7 +2115,7 @@ MonoBehaviour:
   registerButton: {fileID: 526695615}
   statusText: {fileID: 1236895478}
   nicknamePanel: {fileID: 1902048042}
-  nicknameInput: {fileID: 0}
+  nicknameInput: {fileID: 2087773399}
   confirmNicknameButton: {fileID: 1978504534}
   host: 127.0.0.1
   port: 8080
@@ -2857,7 +2857,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1902048043
 RectTransform:
   m_ObjectHideFlags: 0

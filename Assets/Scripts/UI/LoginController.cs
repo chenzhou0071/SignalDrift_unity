@@ -61,14 +61,14 @@ public class LoginController : MonoBehaviour
             if (string.IsNullOrEmpty(r.nickname))
                 nicknamePanel.SetActive(true); // 首次登录未设名：弹设名面板
             else
-                SceneManager.LoadScene("Lobby");
+                SceneManager.LoadScene(1); // Lobby（Build Profiles 顺序：0 Login / 1 Lobby / 2 Battle）
         });
         d.On(MsgId.SetNicknameOK, body =>
         {
             var r = Json.De<SetNicknameResp>(body);
             if (r.code != 0) { statusText.text = "Nickname must be 1-16 chars"; return; }
             NetworkClient.I.Nickname = r.nickname;
-            SceneManager.LoadScene("Lobby");
+            SceneManager.LoadScene(1); // Lobby
         });
         confirmNicknameButton.onClick.AddListener(() =>
         {
