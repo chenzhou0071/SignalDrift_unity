@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -28,11 +29,11 @@ public class LoginController : MonoBehaviour
 
     private void Awake()
     {
-        // 外部配置优先：Resources/network_config.json；缺失时用 Inspector 默认值
-        var cfg = Resources.Load<TextAsset>("network_config");
-        if (cfg != null)
+        // 外部配置优先：StreamingAssets/network_config.json（打包后可改，部署换服务器不用重打包）；缺失时用 Inspector 默认值
+        var path = Path.Combine(Application.streamingAssetsPath, "network_config.json");
+        if (File.Exists(path))
         {
-            var nc = JsonUtility.FromJson<NetConfig>(cfg.text);
+            var nc = JsonUtility.FromJson<NetConfig>(File.ReadAllText(path));
             if (!string.IsNullOrEmpty(nc.host)) host = nc.host;
             if (nc.port > 0) port = nc.port;
             Debug.Log($"[Net] config host={host} port={port}");
