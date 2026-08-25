@@ -16,6 +16,7 @@ using UnityEngine;
 [Serializable] public class FriendInfo { public long uid; public string nickname; public int elo; public bool online; }
 [Serializable] public class FriendListResp { public int code; public FriendInfo[] friends; }
 [Serializable] public class ProfileResp { public int code; public long uid; public string nickname; public int elo; public int max_elo; public int wins; public int losses; }
+[Serializable] public class RoomJoinReq { public long room_id; public string token; }
 
 // 统一序列化入口：UTF-8 + JsonUtility
 public static class Json

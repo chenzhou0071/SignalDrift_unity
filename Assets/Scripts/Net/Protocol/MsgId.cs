@@ -24,4 +24,12 @@ public static class MsgId
     public const ushort SetNicknameOK = 233;
     public const ushort EloUpdate = 234;
     public const ushort ErrorResp = 299;
+    // 战斗 300-349（与 Go 端 roomd.go 消息号对齐）
+    public const ushort RoomJoin = 300;
+    public const ushort RoomJoinOK = 301;
+    public const ushort BattleSnapshot = 303;
+    public const ushort BattleInput = 310;
+    public const ushort BattleState = 320;
+    public const ushort BattleSettle = 340;
+    public const ushort RoomErr = 349;
 }

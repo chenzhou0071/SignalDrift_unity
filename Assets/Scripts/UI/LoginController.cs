@@ -29,6 +29,8 @@ public class LoginController : MonoBehaviour
 
     private void Awake()
     {
+        // 窗口模式 1920×1080（双开调试/演示友好；改大改小改这一行）
+        Screen.SetResolution(1920, 1080, false);
         // 外部配置优先：StreamingAssets/network_config.json（打包后可改，部署换服务器不用重打包）；缺失时用 Inspector 默认值
         var path = Path.Combine(Application.streamingAssetsPath, "network_config.json");
         if (File.Exists(path))
@@ -58,6 +60,9 @@ public class LoginController : MonoBehaviour
             if (r.code != 0) { statusText.text = $"Login failed ({r.code})"; return; }
             NetworkClient.I.Uid = r.uid;
             NetworkClient.I.Nickname = r.nickname;
+            // 内存暂存凭据（断线自动重连用）
+            NetworkClient.I.LastUsername = usernameInput.text.Trim();
+            NetworkClient.I.LastPassword = passwordInput.text;
             NetworkClient.I.ReconnectToken = r.token;
             if (string.IsNullOrEmpty(r.nickname))
                 nicknamePanel.SetActive(true); // 首次登录未设名：弹设名面板

@@ -14,6 +14,10 @@ public class NetworkClient : MonoBehaviour
     public long Uid;              // 登录后由 LoginController 写入
     public string Nickname;       // 玩家显示名（登录/设名后写入，战斗场景读取）
     public string ReconnectToken; // 登录应答签发，断线重连用
+    public string Host { get; private set; }        // 最近一次连接地址（断线重连用）
+    public int Port { get; private set; }           // 最近一次连接端口（断线重连用）
+    public string LastUsername;   // 登录凭据（内存暂存，断线自动重连用）
+    public string LastPassword;
     public MessageDispatcher Dispatcher { get; } = new();
     public event Action OnDisconnected; // 主线程触发
 
@@ -37,6 +41,8 @@ public class NetworkClient : MonoBehaviour
     public void Connect(string host, int port, Action<bool> onResult)
     {
         Disconnect();
+        Host = host;
+        Port = port;
         try
         {
             _client = new TcpClient();
@@ -74,6 +80,7 @@ public class NetworkClient : MonoBehaviour
 
     public void Send<T>(ushort msgId, T body) => SendRaw(msgId, Json.Ser(body));
     public void SendEmpty(ushort msgId) => SendRaw(msgId, null);
+    public void SendBytes(ushort msgId, byte[] body) => SendRaw(msgId, body);
 
     private void SendRaw(ushort msgId, byte[] body)
     {
