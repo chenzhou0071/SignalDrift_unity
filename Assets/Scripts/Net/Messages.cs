@@ -17,6 +17,30 @@ using UnityEngine;
 [Serializable] public class FriendListResp { public int code; public FriendInfo[] friends; }
 [Serializable] public class ProfileResp { public int code; public long uid; public string nickname; public int elo; public int max_elo; public int wins; public int losses; }
 [Serializable] public class RoomJoinReq { public long room_id; public string token; }
+// 结算 JSON（与 Go protocol.SettlePayload 对齐；cov_history 对象数组——JsonUtility 不支持嵌套数组）
+[Serializable] public class SettlePayload
+{
+    public long room_id;
+    public long winner_uid;
+    public long loser_uid;
+    public bool draw;
+    public float[] cov;        // [0]=P0 [1]=P1
+    public CovPoint[] cov_history;
+    public StatsPayload stats_a;
+    public StatsPayload stats_b;
+    public int duration;
+}
+[Serializable] public class CovPoint { public float a; public float b; }
+[Serializable] public class StatsPayload
+{
+    public int painted_cells;
+    public int straight_shots;
+    public int lob_shots;
+    public int hits;
+    public int blackhole_lost;
+    public int reflects;
+}
+[Serializable] public class EloUpdatePush { public int elo; }
 
 // 统一序列化入口：UTF-8 + JsonUtility
 public static class Json

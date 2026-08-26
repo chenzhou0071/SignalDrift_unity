@@ -11,14 +11,18 @@ public class BattleController : MonoBehaviour
 {
     [SerializeField] private TMP_Text statusText;     // 状态/重连遮罩文本（可空）
     [SerializeField] private TMP_Text inputDebugText; // 输入调试显示（可空）：每 0.3s 刷新当前按键状态
+    [SerializeField] private BattleHud hud;           // 战斗 HUD（可空：终局演出/结算联动）
+    [SerializeField] private SettlePanel settlePanel; // 结算面板（可空）
 
     // 对战数据（Task 11 渲染消费）
     public static byte[] SnapshotColors { get; private set; } // 9216 格（快照全量）
     public static byte MySlot { get; private set; }
     public static uint SnapshotTick { get; private set; }
     public static bool InBattle { get; private set; } // 收到首个 State 后 true
+    public static BattleCodec.StateMsg LatestState { get; private set; } // 最新 State（渲染/插值用）
 
     private static readonly List<BattleCodec.StateMsg> StateRing = new(64); // 插值缓冲（Task 11 用）
+    public static System.Collections.Generic.IReadOnlyList<BattleCodec.StateMsg> StateRingView => StateRing;
 
     private string _baseStatus = ""; // 状态行（Connected/重连）
     private string _inputDebug = ""; // 输入行（实时刷新）
@@ -27,6 +31,7 @@ public class BattleController : MonoBehaviour
     private float _reconnectTimer;
     private int _reconnectAttempts;
     private bool _inputLogged; // 诊断：SendInput 首次执行标记
+    private bool _settled;     // 已结算：停止发输入 + 忽略结算后的 349
     private const int MaxReconnectAttempts = 15; // ≈30s 重连窗口
     private const float ReconnectInterval = 2f;
 
@@ -38,6 +43,15 @@ public class BattleController : MonoBehaviour
         d.On(MsgId.RoomJoinOK, _ => { });
         d.On(MsgId.BattleSnapshot, OnSnapshot);
         d.On(MsgId.BattleState, OnState);
+        d.On(MsgId.BattleSettle, OnSettle);
+        d.On(MsgId.EloUpdate, OnElo);
+        d.On(MsgId.RoomErr, _ =>
+        {
+            if (_settled) return; // 结算后网关 Unbind 导致的 349：忽略（对局已结束）
+            // 入房被拒（服务端绑定丢失/房间已结束）：提示并回大厅重新匹配
+            SetStatus("Room join failed. Back to lobby.");
+            Invoke(nameof(BackToLobby), 1.5f);
+        });
         d.On(MsgId.LoginResp, OnReloginResp); // 重连流程的重新登录应答
         NetworkClient.I.OnDisconnected += OnDisconnected;
         SendJoin();
@@ -71,11 +85,13 @@ public class BattleController : MonoBehaviour
         var m = BattleCodec.DecodeState(body);
         StateRing.Add(m);
         if (StateRing.Count > 64) StateRing.RemoveAt(0);
+        LatestState = m;
         InBattle = true;
     }
     // ---------- 30Hz 输入流：WASD + 鼠标瞄准 + 左键直射/右键抛射（新 Input System API） ----------
     private void SendInput()
     {
+        if (_settled) return; // 结算后停止发输入（防结算期 349 误伤）
         if (!_inputLogged)
         {
             _inputLogged = true;
@@ -126,6 +142,24 @@ public class BattleController : MonoBehaviour
         _inputDebug = $"Screen:({sp.x:F0},{sp.y:F0}) World:({aimX},{aimY}) Keys:[{string.Join("][", keys)}]";
         RefreshStatus(); // 每帧刷新（调试期实时性优先）
         if (inputDebugText != null) inputDebugText.text = _inputDebug;
+    }
+
+    private void BackToLobby() => SceneManager.LoadScene(1); // Lobby
+
+    // ---------- 结算：终局演出 + 结算面板（并行，不依赖动画回调） ----------
+    private void OnSettle(byte[] body)
+    {
+        _settled = true; // 停输入 + 忽略后续 349
+        var p = Json.De<SettlePayload>(body);
+        Debug.Log($"[Battle] settle received winner={p.winner_uid} draw={p.draw} panel={(settlePanel != null)} hud={(hud != null)}");
+        settlePanel?.Show(p); // 直接显示（演出盖在上层，渐隐后露出结算框）
+        hud?.PlayWinFlash(p.winner_uid, null);
+    }
+
+    private void OnElo(byte[] body)
+    {
+        var e = Json.De<EloUpdatePush>(body);
+        settlePanel?.OnEloUpdate(e.elo);
     }
 
     // ---------- 断线自动重连：遮罩 → 每 2s Connect（≤15 次）→ 重新登录 → 重新入房 ----------
