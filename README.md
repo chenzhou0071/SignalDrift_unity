@@ -66,4 +66,4 @@ Build Profiles → Windows → Build
 ## 配套文档
 
 - 服务端仓库：https://github.com/chenzhou0071/SignalDrift（架构/配置/压测）
-- 开发日志六篇：`docs/blog/`（服务端仓库内）
+- 开发日志：https://chenzhou0071.github.io/（SignalDrift 开发日志 ①~⑥）
